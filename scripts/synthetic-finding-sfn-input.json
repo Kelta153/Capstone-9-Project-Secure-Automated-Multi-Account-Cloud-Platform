@@ -1,0 +1,23 @@
+{
+  "detail": {
+    "schemaVersion": "2.0",
+    "accountId": "379549361194",
+    "region": "us-east-1",
+    "partition": "aws",
+    "id": "manual-test-real-instance-001",
+    "arn": "arn:aws:guardduty:us-east-1:379549361194:detector/bf3d04695ffc4fe09010003d3b2c5072/finding/manual-test-real-instance-001",
+    "type": "Backdoor:EC2/C&CActivity.B!DNS",
+    "resource": {
+      "resourceType": "Instance",
+      "instanceDetails": {
+        "instanceId": "i-008ee84b4dd76a226",
+        "instanceType": "t3.micro"
+      }
+    },
+    "severity": 8,
+    "createdAt": "2026-09-03T01:15:00.000Z",
+    "updatedAt": "2026-09-03T01:15:00.000Z",
+    "title": "Manually crafted finding for real-instance isolation proof",
+    "description": "Direct Step Functions invocation matching the EventBridge delivery shape, since PutEvents blocks manual publishing under the reserved aws.guardduty source namespace by design."
+  }
+}

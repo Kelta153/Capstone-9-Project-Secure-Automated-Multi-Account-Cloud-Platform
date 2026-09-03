@@ -1,0 +1,39 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+# id-token: write is required for OIDC — without it, GitHub never issues
+# the JSON Web Token that AWS's identity provider needs to see.
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::379549361194:role/capstone-9-github-actions-deploy
+          aws-region: us-east-1
+
+      - name: Verify assumed identity (no static keys involved)
+        run: aws sts get-caller-identity
+
+      - name: Package the evaluator Lambda
+        run: |
+          cd lambda/evaluator
+          zip -r ../../function.zip .
+
+      - name: Deploy Lambda function code
+        run: |
+          aws lambda update-function-code \
+            --function-name capstone-9-finding-evaluator \
+            --zip-file fileb://function.zip
