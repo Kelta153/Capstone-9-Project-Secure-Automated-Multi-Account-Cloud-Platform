@@ -772,6 +772,31 @@ These are presented as evidence of engineering judgment under real constraints, 
   and is documented in full in Section 2 as a genuinely non-obvious, currently under-documented
   AWS/GitHub interaction — worth flagging for anyone reproducing this project today or in the future.
 
+### Post-Teardown State
+
+Infrastructure was deliberately torn down after grading evidence was collected, to avoid
+ongoing AWS costs. One visible consequence: if the GitHub Actions
+`Deploy` workflow is triggered after teardown, it will fail at the
+**"Configure AWS credentials via OIDC"** step with:
+
+```
+Error: The web identity token provided could not be validated. See the
+AssumeRoleWithWebIdentity documentation for requirements.
+```
+
+This is expected, not a bug — the `aws_iam_openid_connect_provider` resource (along with
+everything else in `terraform/workload`) was destroyed as part of teardown, so there is no
+longer an OIDC provider registered in AWS for GitHub's token to validate against. This differs
+from the Scenario 3 (unauthorized branch) failure mode documented above, where the provider and
+role still existed and the *trust policy condition* correctly rejected the token — that failure
+read `Not authorized to perform sts:AssumeRoleWithWebIdentity`. The two distinct error messages
+are themselves a useful signal for distinguishing "trust policy correctly rejected this" from
+"the provider doesn't exist" when debugging OIDC in general.
+
+To restore full functionality, re-run `terraform apply` in `terraform/workload` — this recreates
+the OIDC provider, IAM roles, and all other destroyed resources, and the CI/CD workflow will
+work exactly as demonstrated in this report.
+
 ---
 
 ## Five Exam-Style Answers
