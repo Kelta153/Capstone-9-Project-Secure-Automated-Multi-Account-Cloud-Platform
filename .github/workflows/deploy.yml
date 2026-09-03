@@ -18,22 +18,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Debug OIDC context
-        run: |
-          echo "repository: ${{ github.repository }}"
-          echo "ref: ${{ github.ref }}"
-          echo "event: ${{ github.event_name }}"
-
-      - name: Debug - decode actual OIDC token claims
-        run: |
-          IDTOKEN=$(curl -sSL -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value')
-          python3 -c "
-          import sys, base64, json
-          s = sys.argv[1]
-          s += '=' * (-len(s) % 4)
-          print(json.dumps(json.loads(base64.urlsafe_b64decode(s)), indent=2))
-          " "$(echo $IDTOKEN | cut -d. -f2)"
-
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
