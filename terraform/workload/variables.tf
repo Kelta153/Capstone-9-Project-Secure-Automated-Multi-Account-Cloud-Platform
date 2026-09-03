@@ -30,3 +30,15 @@ variable "security_alert_email" {
   description = "Email address to receive security alerts via SNS"
   type        = string
 }
+
+variable "github_owner_id" {
+  description = "GitHub numeric account ID — part of GitHub's immutable OIDC subject claim format (repo:owner@ownerId/repo@repoId:ref:...)"
+  type        = string
+  default     = "84316489"
+}
+
+variable "github_repo_id" {
+  description = "GitHub numeric repository ID — see github_owner_id"
+  type        = string
+  default     = "1351933997"
+}

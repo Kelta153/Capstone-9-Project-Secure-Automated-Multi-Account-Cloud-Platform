@@ -23,12 +23,18 @@ data "aws_iam_policy_document" "github_actions_trust" {
       values   = ["sts.amazonaws.com"]
     }
 
-    # Restricts to a specific repo AND branch — a workflow run from any
-    # fork, any other repo, or a non-main branch cannot assume this role.
+    # Restricts to a specific repo AND branch. GitHub's subject claim now
+    # embeds immutable numeric owner/repo IDs alongside the names
+    # (repo:owner@ownerId/repo@repoId:ref:...) specifically to prevent
+    # spoofing via repo renames or ownership transfers — confirmed by
+    # decoding the actual token GitHub issues, since the plain
+    # name-only format (used in most older tutorials) never matches.
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_repo}:ref:refs/heads/${var.github_branch}"]
+      values = [
+        "repo:${split("/", var.github_repo)[0]}@${var.github_owner_id}/${split("/", var.github_repo)[1]}@${var.github_repo_id}:ref:refs/heads/${var.github_branch}"
+      ]
     }
   }
 }
